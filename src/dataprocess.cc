@@ -699,7 +699,7 @@ void DatasProc3D::Prepare_mats_from_planes()
   for(int i=0;i<p1->n_cuts;i++){
     phi_l[i]=double(i)*dphi;
   }
-  double Ly=2.0*cplPI/(double(p1->n0_global)*p1->rhostar*p1->minor_r)*abs(p1->C_y[1]);
+  double Ly=2.0*cplPI/(double(p1->n0_global)*p1->rhostar*p1->minor_r)*std::abs(p1->C_y[1]);
   double dy_inv=Ly/double(p1->y_res_back);
   
   double q,y,chi_red,phi,phi_red,chi_red_l,chi_red_r,phi_red_l,phi_red_r,dist_phi,
@@ -754,7 +754,7 @@ void DatasProc3D::Prepare_mats_from_planes()
 
         //left_plane 
         for(LO m=0;m<p3->versurf[i+p3->li1];m++){
-          tmp[m]=abs(p3->zcoordsurf[i][m]-chi_red_l);
+          tmp[m]=std::abs(p3->zcoordsurf[i][m]-chi_red_l);
         } 
 
         ind_u=minloc(tmp,p3->versurf[i+p3->li1]);
@@ -789,7 +789,7 @@ void DatasProc3D::Prepare_mats_from_planes()
 
         ////right plane
         for(LO m=0;m<p3->versurf[i+p3->li1];m++){
-          tmp[m]=abs(p3->zcoordsurf[i][m]-chi_red_r);
+          tmp[m]=std::abs(p3->zcoordsurf[i][m]-chi_red_r);
         }
 
         ind_u=minloc(tmp,p3->versurf[i+p3->li1]);

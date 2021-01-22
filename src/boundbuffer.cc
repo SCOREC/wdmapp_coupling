@@ -302,7 +302,7 @@ void gemXgcDatasProc3D::zDensityBoundaryBufAssign(double*** box)
       mpisendrecv_aux2D(p1->comm_z, nzb, lx, ly, lz, bdesc->lowdenzgemxgc, bdesc->updenzgemxgc, box);
 
       //FIXME: It looks GEM doesn't enforce the parallel boundary condition
-
+//  printf("denbuff, p1->mype_z: %d \n", p1->mype_z);
    } else {
       std::cout << "ERROR: nzb is larger than lz. A larger lz is required.";
       std::exit(EXIT_FAILURE);
@@ -318,10 +318,23 @@ void gemXgcDatasProc3D::zDensityBoundaryBufAssign(double*** box)
           }
         }
       }
+// printf("denbuff, p1->mype_z: %d \n", p1->mype_z);     
     } else {
       std::cout << "The topology is not right." << '\n';
       std::exit(EXIT_FAILURE);
     }
+  }
+
+  bool debug = false;
+  if (debug){
+      for (LO i = 0; i < lx ; i++) {
+        for (LO j = 0; j < ly; j++) {
+          for (LO k = 0; k < nzb; k++) {
+            printf("i: %d, j: %d, lowdenz: %f, updenz: %f\n", i,j,bdesc->lowdenzgemxgc[i][j][k], 
+            bdesc->updenzgemxgc[i][j][k]);
+          }
+        }
+      }
   }
 }
 

@@ -4,7 +4,7 @@
 #include <adios2.h>
 #include <iostream>
 #include <cassert>
-#include <Kokkos_Core.hpp> //not used
+//#include <Kokkos_Core.hpp> //not used
 #include <typeinfo> //not used
 #include <string>
 #include <fstream>
@@ -128,6 +128,12 @@ namespace coupler {
       delete a;
     }
 
+  template<typename T>
+    void destroy(Array3d<T>* a) {
+      delete a;
+    }
+
+
   /** Sanity check values
    */
   template<typename T>
@@ -179,7 +185,7 @@ namespace coupler {
     if(!eng){
       read_io.SetEngine("Sst");
       read_io.SetParameters({
-//          {"DataTransport","RDMA"},
+          {"DataTransport","RDMA"},
           {"OpenTimeoutSecs", "480"}
           });
       eng = read_io.Open(fname, adios2::Mode::Read);
@@ -213,8 +219,7 @@ namespace coupler {
     const adios2::Dims count{my_count};
  
     const adios2::Box<adios2::Dims> sel(start, count);
-    Array1d<T>* field = new Array1d<T>{total_size, my_count, 
-    	my_start};
+    Array1d<T>* field = new Array1d<T>{total_size, my_count, my_start};
   
     adios_var.SetSelection(sel);
     eng.Get(adios_var, field->data());
@@ -235,7 +240,7 @@ namespace coupler {
     if(!eng){
       read_io.SetEngine("Sst");
       read_io.SetParameters({
-//          {"DataTransport","RDMA"},
+          {"DataTransport","RDMA"},
           {"OpenTimeoutSecs", "480"}
           });
       eng = read_io.Open(fname, adios2::Mode::Read);
@@ -280,7 +285,7 @@ namespace coupler {
       std::cout<<"creat engine for: "<<name<<'\n';
       read_io.SetEngine("Sst");
       read_io.SetParameters({
- //         {"DataTransport","RDMA"},
+          {"DataTransport","RDMA"},
           {"OpenTimeoutSecs", "800"}
           });
       std::cout<<"engine parameters are set"<<'\n';
@@ -322,15 +327,13 @@ namespace coupler {
     int rank, nprocs;
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &nprocs);
-    std::cout<<"rank="<<rank<<'\n';
-  
+ 
     const std::string fname = dir + "/" + name + ".bp";
-    std::cout<<fname<<'\n'; 
     if(m==0){
       std::cout<<"creat engine for: "<<name<<'\n';
       read_io.SetEngine("Sst");
       read_io.SetParameters({
-//          {"DataTransport","RDMA"},
+          {"DataTransport","RDMA"},
           {"OpenTimeoutSecs", "800"}
           });
       std::cout<<"engine parameters are set"<<'\n';
@@ -347,7 +350,8 @@ namespace coupler {
     const auto dim0 = adVar.Shape()[0]; 
     const auto dim1 = adVar.Shape()[1]; 
     const auto dim2 = adVar.Shape()[2];
-    std::cout<<"Shape 0 1 2="<<dim0<<" "<<dim1<<" "<<dim2<<'\n';
+
+    std::cout<<"rank Shape 0 1 2="<<rank<<" "<<dim0<<" "<<dim1<<" "<<dim2<<'\n';
     //fortran to C transpose
     const auto DIM0 = dim2;
     const auto DIM1 = dim1;
@@ -402,12 +406,21 @@ namespace coupler {
       std::string name = handler.get_name();
     return receive1d_from_ftn<T>(cce_folder,name, handler.IO, handler.eng, model);
   }
+
   template<typename T>
   Array2d<T>* receive_pproc_2d(const std::string cce_folder,
       adios2_handler &handler,GO my_start[2], GO my_count[2], const int m, MPI_Comm comm = MPI_COMM_WORLD) { 
       std::string name = handler.get_name();
     return receive2d_from_ftn<T>(cce_folder,name, handler.IO, handler.eng,my_start, my_count, comm, m);
   }
+
+  template<typename T>
+  Array3d<T>* receive_pproc_3d(const std::string cce_folder,
+      adios2_handler &handler, GO* my_start, GO* my_count, const int m, MPI_Comm comm = MPI_COMM_WORLD) {
+      std::string name = handler.get_name();
+   return receive3d_from_ftn<T>(cce_folder, name, handler.IO, handler.eng, my_start, my_count, comm, m);
+  } 
+
   template<typename T>
   T* receive_exact(const std::string cce_folder,
       adios2_handler &handler, GO my_start, GO my_count, MPI_Comm comm = MPI_COMM_WORLD) { 
@@ -438,7 +451,8 @@ template<typename T>
           });
       send_id = sendIO.DefineVariable<T>(fldname,
           g_dims, g_offset, l_dims);
-    
+      printf("before cpl_density open \n"); 
+      MPI_Barrier(MPI_COMM_WORLD);
       engine = sendIO.Open(fname, adios2::Mode::Write,comm);
     }
     if(engine) std::cout<<"sending Engine for "<<fldname<<" is created."<<'\n';   
@@ -451,7 +465,7 @@ template<typename T>
 
   Array2d<CV>* receive_density(const std::string cce_folder,
       adios2_handler &handler,GO my_start[2],GO my_count[2], MPI_Comm comm, const int m);
-
+ 
   void send_density(const std::string cce_folder, const Array2d<double>* density,
       const adios2_handler &handler, adios2::Variable<double> &send_id);
 

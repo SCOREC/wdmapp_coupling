@@ -94,9 +94,11 @@ void BoundaryDescr3D::initGemXgc(const Part3Mesh3D& p3m3d,const Part1ParalPar3D 
 {
   nzb=p1pp3d.nzb;
   ymeshgem=new double[p1pp3d.lj0+4];
+
   for(LO j=0;j<p1pp3d.lj0;j++){
     ymeshgem[2+j]=p1pp3d.y_gem[j];
   }
+
   ymeshgem[1]=p1pp3d.y_gem[p1pp3d.lj0-1]-p1pp3d.ly;
   ymeshgem[0]=p1pp3d.y_gem[p1pp3d.lj0-2]-p1pp3d.ly;
   ymeshgem[p1pp3d.lj0+2]=p1pp3d.y_gem[0]+p1pp3d.ly;
@@ -110,40 +112,42 @@ void BoundaryDescr3D::initGemXgc(const Part3Mesh3D& p3m3d,const Part1ParalPar3D 
     thetameshgem[1]=p1pp3d.theta[p1pp3d.lk1-1];
     thetameshgem[0]=p1pp3d.theta[p1pp3d.lk1-2];
     thetameshgem[p1pp3d.lk0+2]=p1pp3d.theta[p1pp3d.lk2+1];
-    thetameshgem[p1pp3d.lk0+3]=p1pp3d.theta[p1pp3d.lk1+2];
+    thetameshgem[p1pp3d.lk0+3]=p1pp3d.theta[p1pp3d.lk2+2];
   }else if(p1pp3d.mype_z==0){
-    thetameshgem[1]=-p1pp3d.dth;
-    thetameshgem[0]=-2.0*p1pp3d.dth;
+    double delta = p1pp3d.theta[1] - p1pp3d.theta[0];
+    thetameshgem[1]=-delta + p1pp3d.theta[0];
+    thetameshgem[0]=-2.0*delta + p1pp3d.theta[0];
     thetameshgem[p1pp3d.lk0+2]=p1pp3d.theta[p1pp3d.lk2+1];
     thetameshgem[p1pp3d.lk0+3]=p1pp3d.theta[p1pp3d.lk2+2];     
   }else {
+    double delta = p1pp3d.theta[p1pp3d.lk2] - p1pp3d.theta[p1pp3d.lk2-1];
     thetameshgem[1]=p1pp3d.theta[p1pp3d.lk1-1];
     thetameshgem[0]=p1pp3d.theta[p1pp3d.lk1-2];
-    thetameshgem[p1pp3d.lk0+2]=p1pp3d.theta[p1pp3d.lk2]+p1pp3d.dth;
-    thetameshgem[p1pp3d.lk0+3]=p1pp3d.theta[p1pp3d.lk2]+2.0*p1pp3d.dth;
+    thetameshgem[p1pp3d.lk0+2]=p1pp3d.theta[p1pp3d.lk2] + delta;
+    thetameshgem[p1pp3d.lk0+3]=p1pp3d.theta[p1pp3d.lk2] + 2.0*delta;
   }
-//FIXME: is the boundary buffer required?
+  /*FIXME: is the boundary buffer required?*/
   ymeshxgc = new double**[p3m3d.li0];
   for(LO i=0;i<p3m3d.li0;i++){
     ymeshxgc[i]=new double*[p3m3d.mylk0[i]];
     for(LO k=0;k<p3m3d.mylk0[i];k++)
       ymeshxgc[i][k]=new double[p3m3d.nphi];
   }
-//FIXME: there is problems
+  /*FIXME: there is problems*/
   for(LO i=0;i<p3m3d.li0;i++){
     for(LO k=0;k<p3m3d.mylk0[i];k++){
       for(LO j=0;j<p3m3d.nphi;j++)
         ymeshxgc[i][k][j]=p3m3d.y_xgc[i][j][k];
     }
   }
- //3rd order central Lagrange interpolation
+  /*3rd order central Lagrange interpolation*/
   thflxmeshxgc=new double*[p3m3d.li0];
   for(LO i=0;i<p3m3d.li0;i++){
     thflxmeshxgc[i]=new double[p3m3d.mylk0[i]+4];
     for(LO k=0;k<p3m3d.mylk0[i];k++){
       thflxmeshxgc[i][k+2]=p3m3d.theta_flx[i][p3m3d.mylk1[i]+k];
     }
-    // for lower boundary
+    /*for lower boundary*/
     if(p3m3d.mylk1[i]==0){
       thflxmeshxgc[i][1]=p3m3d.theta_flx[i][p3m3d.versurf[i+p1pp3d.li1]-1]-2.0*cplPI; 
       thflxmeshxgc[i][0]=p3m3d.theta_flx[i][p3m3d.versurf[i+p1pp3d.li1]-2]-2.0*cplPI;
@@ -154,7 +158,7 @@ void BoundaryDescr3D::initGemXgc(const Part3Mesh3D& p3m3d,const Part1ParalPar3D 
       thflxmeshxgc[i][1]=p3m3d.theta_flx[i][p3m3d.mylk1[i]-1];
       thflxmeshxgc[i][0]=p3m3d.theta_flx[i][p3m3d.mylk1[i]-2];
     }
-    //for upper boundary
+    /*for upper boundary*/
     if(p3m3d.mylk2[i]==p3m3d.versurf[i+p1pp3d.li1]-1){
       thflxmeshxgc[i][p3m3d.mylk0[i]+2]=p3m3d.theta_flx[i][0]+2.0*cplPI;
       thflxmeshxgc[i][p3m3d.mylk0[i]+3]=p3m3d.theta_flx[i][1]+2.0*cplPI;
@@ -195,5 +199,5 @@ void BoundaryDescr3D::initGemXgc(const Part3Mesh3D& p3m3d,const Part1ParalPar3D 
 
 }
 
-}
+} // BoundaryDescr3D.cc 
  

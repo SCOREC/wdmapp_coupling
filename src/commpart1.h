@@ -76,21 +76,25 @@ class Part1ParalPar3D {
     LO nnodes;
     MPI_Comm grid_comm,tube_comm;
     LO gnpz; // the number of process ong z dimension in grid_comm communicator 
+    LO tnpx;
 
-    double lz,ly;
-    double dth,delz;
-    double r0,q0;
+    double lz, ly;
+    double dth, delz;
+    double r0, q0;
     double* thetagrideq=NULL; //store ntheta \theta values of all the nodes on one poloidal cross section of GEM
     double* theta=NULL; // store kmx+1 \theta values for the perturbation
     double** thflxeq=NULL; //store GEM's flux coordinates theta*; sent from GEM
     double** thflx=NULL;   //store GEM's flux coordinates theta; for perturbation evolution.  
     double* y_gem=NULL;  //store jmx+1 y varaibles of GEM
-    LO nr, nwedge;
+    LO nr;
+    LO nwedge;
+    LO nphi; 
+    LO nnode;
 
-    LO mype_g,mype_t;
+    LO mype_g, mype_t;
     LO** mype_xztg=NULL; // store the mapping mype<-->(mype_x,mype_y)<-->(mype_t,mype_g)
-    LO tli0,tli1,tli2;
-    LO glk0,glk1,glk2;
+    LO tli0, tli1, tli2;
+    LO glk0, glk1, glk2;
 
     vecint2d sendOverlap_x;
     vecint2d sendOverlap_th;
@@ -150,7 +154,7 @@ class Part1ParalPar3D {
     void initGem(const Array1d<int>* gemmesh, const Array1d<double>* thflx_qprof);    
     void CreateGroupComm();
     void overlapBox();
-    void getOverlapBox(vecint2d vec2d,LO* lowind,LO* upind,LO numproc2,LO low,LO up);
+    void getOverlapBox(vecint2d& vec2d, LO* lowind, LO* upind, LO numproc2, LO low, LO up);
     void rankMapping();
     void decomposeGemMeshforCoupling();
 };

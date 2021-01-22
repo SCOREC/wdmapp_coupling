@@ -1,25 +1,25 @@
 #include "adios2Routines.h"
-
+/*
 void exParFor() {
   Kokkos::parallel_for(
       4, KOKKOS_LAMBDA(const int i) {
         printf("Hello from kokkos thread i = %i\n", i);
       });
 }
-
+*/
 int main(int argc, char **argv){
   int rank, nprocs;
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-
+/*
   Kokkos::initialize(argc, argv);
   if(!rank) {
     printf("Hello World on Kokkos execution space %s\n",
          typeid(Kokkos::DefaultExecutionSpace).name());
     exParFor();
   }
-
+*/
   adios2::ADIOS adios(MPI_COMM_WORLD, adios2::DebugON);
   adios2::Variable<double> send_dbl_var;
   adios2::Variable<coupler::CV> send_cv_var;
@@ -52,7 +52,7 @@ int main(int argc, char **argv){
     }
   }
 
-  Kokkos::finalize();
+//  Kokkos::finalize();
   MPI_Finalize();
   return 0;
 }

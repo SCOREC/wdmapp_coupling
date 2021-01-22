@@ -149,6 +149,8 @@ class gemXgcDatasProc3D {
     double*** densinterone = NULL;  // Store the density interpolated along theta
     double*** densintertwo = NULL;  // Store the density interpolated along y
     double*** densXgc = NULL;
+    double*  denssend = NULL;
+
     double**** pot_gem_fl = NULL;
     double*** potyCpl = NULL;
     double*** potythCpl = NULL;
@@ -167,8 +169,13 @@ class gemXgcDatasProc3D {
       const bool pproc = true,
       const TestCase test_case = TestCase::off,
       const bool ypar = false);
-    ~gemXgcDatasProc3D(){};
 
+    ~gemXgcDatasProc3D(){};
+    
+    void DistriDensiRecvfromGem(const Array3d<double>* densityfromGEM);
+    void DistriPotentRecvfromXGC(const Array2d<double>* fieldfromXGC);
+    void densityFromGemToCoupler(const Array3d<double>* densityfromGEM);  
+ 
   private:
     const bool preproc;
     const TestCase testcase;
@@ -180,16 +187,14 @@ class gemXgcDatasProc3D {
     void allocDensityArrays();
     void allocPotentArrays();
     void allocSendRecvbuff();
-    void DistriDensiRecvfromGem(const Array3d<double>* densityfromGEM);
-    void DistriPotentRecvfromXGC(const Array3d<double>* potentfromXGC);
-    void densityFromGemToCoupler(const Array3d<double>* densityfromGEM);  
     void interpoDensityAlongZ(double*** box);
     void interpoDensityAlongY();
     void InterpoPotential3DAlongZ(double*** boxyin, double*** boxout); 
-    void potentFromCouplerToGem();
+    void potentFromCouplerToGem(const Array2d<double>* fieldfromXGC);
     void zPotentBoundaryBufAssign(const double*** box,BoundaryDescr3D& bdesc);
     void zMeshPotentBoundaryBufAssign(BoundaryDescr3D& bdesc);
     void zDensityBoundaryBufAssign(double*** box);
+    void distriDataAmongCollective(const Part1ParalPar3D* p1, const Part3Mesh3D* p3, double*** inmatrix, double* outmatrix);
 };
 
 

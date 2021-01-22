@@ -235,5 +235,38 @@ void printminmax4d(T**** array, LO inds1d,LO inds2d,LO inds3d,LO inds4d,
   std::cout<<name<<" "<<rank<<" "<<i1<<" "<<j1<<" "<<k1<<" "<<l1<<'\n';
 }
 
+
+
+/*for reorder the datas between different collectives*/
+template<class T>
+void reshuffleforward(T* array,const LO nstart,const LO vertnum)
+{
+  T* tmp=new T[vertnum];
+  for(LO i=0;i<vertnum-nstart;i++)
+    tmp[i]=array[nstart+i];
+  for(LO j=vertnum-nstart;j<vertnum;j++)
+    tmp[j]=array[j-vertnum+nstart];
+  for(LO k=0;k<vertnum;k++)
+    array[k]=tmp[k];
+  delete[] tmp;
 }
-#endif
+
+
+template<class T>
+void reshufflebackward(T* array,const LO nstart,const LO vertnum)
+{
+  T* tmp=new T[vertnum];
+  for(LO i=vertnum-nstart;i<vertnum;i++)
+    tmp[i-vertnum+nstart]=array[i];
+  for(LO j=0;j<vertnum-nstart;j++)
+    tmp[j+nstart]=array[j];
+  for(LO k=0;k<vertnum;k++)
+    array[k]=tmp[k];
+  delete[] tmp;
+}
+
+std::string filename(std::string const& s);
+
+
+}
+#endif  /*testutilities.h*/

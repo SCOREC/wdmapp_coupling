@@ -13,13 +13,13 @@ namespace coupler {
 // any of its functions or access its member variables
 
 template<class T>
-class Array2d;
+class Array1d;
 
 class Part1ParalPar3D;
 
 struct flxxgc {
-  LO flxtind[5];
-  double flxt[4];
+  LO flxtind[4];
+  double flxt[5];
 };
 
 class Part3Mesh3D{
@@ -71,7 +71,7 @@ class Part3Mesh3D{
     double** theta_geo=NULL; //store the theta value of the nodes on the surface of xgc in the local process
     double** theta_flx=NULL; //store  the flux_theta of the nodes on the surface of xgc mesh in the local process
     LO cce_first; // The number labelling the first surface 
-    double*** y_xgc=NULL; 
+    double*** y_xgc=NULL; // 
     double**** zeta_pot=NULL; //Store the theta_f mesh for interpolating potential provided by XGC to the one for GEM
     double***** thetaflx_pot=NULL; //Store the five flux theta values for the 3rd order interpolation along the field line.
     LO***** thetaflx_ind_pot=NULL; //Store the four indices of nodals for the 3rd order interpolation along the field line.
@@ -113,11 +113,14 @@ class Part3Mesh3D{
       init(p1pp3d,tdir);
     }
 
-    Part3Mesh3D(Array1d<LO>* xgccouple,
+    Part3Mesh3D(Part1ParalPar3D* p1pp3d,
+        Array1d<LO>* xgccouple,
         Array1d<double>* rzcoords,
         bool pproc,
         TestCase tcase)
-      : preproc(pproc),test_case(tcase){                    
+      : p1(p1pp3d),
+        preproc(pproc),
+	test_case(tcase){                    
         initXgcGem(xgccouple,rzcoords);
     }
 
@@ -134,14 +137,14 @@ class Part3Mesh3D{
         const std::string test_dir="");
     /* helper function called by DistriPart3zcoords */
     void DistributePoints(const double* exterarr, const LO gstart, const LO li,
-        const double* interarr, const Part1ParalPar3D  &p1pp3d);
+        const double* interarr, const LO lk1, const LO lk2, const LO nz0);
     void BlockIndexes(const MPI_Comm comm_x,const LO mype_x,const LO npx);
     void gemDistributePoints(const double* exterarr, const LO gstart,LO li,
          const double* interarr);
     void initXgcGem(const Array2d<int>* xgcnodes,const Array2d<double>* rzcoords);
     void JugeFirstSurfaceMatch(double xp1);
     inline LO search_zeta(const double dlength,const double length,const LO nlength,double tmp);
-    inline struct flxxgc* search_flux_3rdorder_periodbound(double tmpflx,const double* flxin, LO num);
+    inline void  search_flux_3rdorder_periodbound(double tmpflx,const double* flxin, LO num, struct flxxgc flxinter);
     void search_y(LO j1,LO j2,double w1,double w2,const double dy,const double ly,const double tmp); 
  
 
@@ -158,35 +161,8 @@ class Part3Mesh3D{
 // be removed.
 LO  minloc(const double* zcoords, const LO n); 
 
-template<class T>
-void reshuffleforward(T* array,const LO nstart,const LO vertnum)
-{
-  T* tmp=new T[vertnum];
-  for(LO i=0;i<vertnum-nstart;i++)
-    tmp[i]=array[nstart+i];
-  for(LO j=vertnum-nstart;j<vertnum;j++)
-    tmp[j]=array[j-vertnum+nstart];
-  for(LO k=0;k<vertnum;k++)
-    array[k]=tmp[k];
-  delete[] tmp;
-}
-
-
-template<class T>
-void reshufflebackward(T* array,const LO nstart,const LO vertnum)
-{
-  T* tmp=new T[vertnum];
-  for(LO i=vertnum-nstart;i<vertnum;i++)
-    tmp[i-vertnum+nstart]=array[i];
-  for(LO j=0;j<vertnum-nstart;j++)
-    tmp[j+nstart]=array[j];
-  for(LO k=0;k<vertnum;k++)
-    array[k]=tmp[k];
-  delete[] tmp;
-}
-
 double minimalvalue(const double* array, const LO n);
 
 }
 
-#endif
+#endif /*importpart3mesh.h*/
